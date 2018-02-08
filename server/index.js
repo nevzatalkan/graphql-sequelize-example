@@ -10,9 +10,9 @@ const graphqlHTTP = require('express-graphql');
 var cors = require('cors')
 
 const app = express();
-const sequelize = new Sequelize('database', 'username', 'password', {
+const sequelize = new Sequelize('sikke_development', 'ottoman', 'Crocodile87*1', {
   // sqlite! now!
-  dialect: 'sqlite',
+  dialect: 'mysql',
 
   // the storage engine for sqlite
   // - default ':memory:'
@@ -23,7 +23,7 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 
 });
 
-const User = sequelize.define('User', {
+const Kullanici = sequelize.define('kullanici', {
   id: {
     type: Sequelize.INTEGER,
     autoIncrement: true,
@@ -42,52 +42,156 @@ const User = sequelize.define('User', {
 }, {
   timestamps: true
 });
-const Todo = sequelize.define('Todo', {
+
+const Doviz = sequelize.define('doviz', {
   id: {
     type: Sequelize.INTEGER,
     autoIncrement: true,
     primaryKey: true,
-    allowNull: true
+    allowNull: false
   },
-  text: {
+  ad: {
     type: Sequelize.STRING,
     allowNull: false
   },
-  completed: {
-    type: Sequelize.BOOLEAN,
+  kod: {
+    type: Sequelize.STRING,
     allowNull: false
   }
 }, {
   timestamps: true
 });
 
-const TodoAssignee = sequelize.define('TodoAssignee', {
-  primary: {
-    type: Sequelize.BOOLEAN
+const Personel = sequelize.define('personel', {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+    allowNull: false
+  },
+  gorev: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  kullaniciid: {
+    type: Sequelize.INTEGER,
+    allowNull: false
   }
 }, {
   timestamps: true
 });
 
+const Urun = sequelize.define('urun', {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+    allowNull: false
+  },
+  ad: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  alisFiyati: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  satisFiyati: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  dovizid: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  }
+}, {
+  timestamps: true
+});
 
-User.hasMany(Todo, {
-  as: 'todos',
-  foreignKey: 'userId'
-});
-Todo.belongsTo(User, {
-  as: 'user',
-  foreignKey: 'userId'
+const Stok = sequelize.define('stok', {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+    allowNull: false
+  },
+  adet: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  urunid: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  }
+}, {
+  timestamps: true
 });
 
-// belongsToMany
-User.belongsToMany(Todo, {
-  as: 'assignedTodos',
-  through: TodoAssignee
+const Hareket = sequelize.define('hareket', {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+    allowNull: false
+  },
+  adet: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  urunid: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  dovizid: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  kullaniciid: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  islemtipi: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+}, {
+  timestamps: true
 });
-Todo.belongsToMany(User, {
-  as: 'assignees',
-  through: TodoAssignee
+
+
+Stok.hasMany(Urun, {
+  as: 'urunler',
+  foreignKey: 'urunid'
 });
+Personel.belongsTo(Kullanici, {
+  as: 'kullanici',
+  foreignKey: 'kullaniciid'
+});
+
+Urun.belongsTo(Doviz, {
+  as: 'doviz',
+  foreignKey: 'dovizid'
+});
+
+Hareket.hasMany(Urun, {
+  as: 'urun',
+  foreignKey: 'urunid'
+});
+
+Hareket.hasMany(Doviz, {
+  as: 'doviz',
+  foreignKey: 'dovizid'
+});
+
+// // belongsToMany
+// User.belongsToMany(Todo, {
+//   as: 'assignedTodos',
+//   through: TodoAssignee
+// });
+// Todo.belongsToMany(User, {
+//   as: 'assignees',
+//   through: TodoAssignee
+// });
 
 sequelize.sync({
   force: true
@@ -103,7 +207,7 @@ sequelize.sync({
     graphiql: true
   }));
 
-  const port = 8080;
+  const port = 8085;
   app.listen(port, () => {
     console.log(`Listening on port ${port}`);
   });
